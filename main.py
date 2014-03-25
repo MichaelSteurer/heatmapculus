@@ -50,15 +50,13 @@ def parse_file(csv_file):
       coordinates.append((ts, x, y, z, phi_x, phi_y, phi_z))
   return coordinates
 
-def main(csv_file):
-  coordinates = parse_file(csv_file)
-  interval = 3
 
+def transform_array_to_heatmap(coordinates, resize_factor):
   x_list = [element[1] for element in coordinates]
   z_list = [element[3] for element in coordinates]
 
-  heatmap_size_x = (int(max(x_list)) - int(min(x_list))) / interval + 1
-  heatmap_size_z = (int(max(z_list)) - int(min(z_list))) / interval + 1
+  heatmap_size_x = (int(max(x_list)) - int(min(x_list))) / resize_factor + 1
+  heatmap_size_z = (int(max(z_list)) - int(min(z_list))) / resize_factor + 1
   heatmap_array = np.zeros((heatmap_size_x, heatmap_size_z))
 
   offset_x = -int(min(x_list))
@@ -67,27 +65,31 @@ def main(csv_file):
   logging.info("Heatmap Size: " + str(heatmap_size_x) + "/" + str(heatmap_size_z))
 
   for (ts, x, y, z, phi_x, phi_y, phi_z) in coordinates:
-    current_x = int((x + offset_x) / interval)
-    current_z = int((z + offset_z) / interval)
+    current_x = int((x + offset_x) / resize_factor)
+    current_z = int((z + offset_z) / resize_factor)
 
     logging.debug("Mapping: %d -> %d" % ((x + offset_x), current_x))
     logging.debug("Mapping: %d -> %d" % ((z + offset_z), current_z))
 
     heatmap_array[current_x][current_z] += 1
+  return heatmap_array
 
+def main(csv_file):
+  coordinates = parse_file(csv_file)
+  resize_factor = 3
+  heatmap_array = transform_array_to_heatmap(coordinates, resize_factor)
+
+  ##Filter Array
   def array_transformed(x):
     return x if x!= 0 else -np.inf
-
   func = vectorize(array_transformed)
-  heatmap_array_transformed = func(heatmap_array)
+  heatmap_array = func(heatmap_array)
 
-  #print(heatmap_array)
-  #print(heatmap_array_transformed)
+  #np.set_printoptions(precision=1, suppress=True, linewidth=200)
 
-  np.set_printoptions(precision=1, suppress=True, linewidth=200)
-
-  fig = plt.figure(frameon=False)
-  im2 = imshow(heatmap_array_transformed, cmap=cm.jet, alpha=.9)
+  ##Show Heatmap
+  plt.figure(frameon=False)
+  imshow(heatmap_array, cmap=cm.jet, alpha=1)
   show()
 
 if __name__ == "__main__":
