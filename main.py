@@ -76,7 +76,6 @@ def transform_array_to_heatmap(coordinates, resize_factor=1):
   logging.debug("Heatmap Size: %s/%s" % (heatmap_size_x, heatmap_size_z))
   logging.debug("Transformation Offset: %s/%s" % (offset_x, offset_z))
 
-  #mind that x and z are switched. This is because we have to rotate the axes to have a traditional x/y system
   heatmap_array = np.zeros((heatmap_size_z, heatmap_size_x))
   for (ts, x, y, z, phi_x, phi_y, phi_z) in coordinates:
     current_x = int((x + offset_x ) / resize_factor) + border
@@ -85,8 +84,10 @@ def transform_array_to_heatmap(coordinates, resize_factor=1):
     #logging.debug("Mapping X: %d -> %d" % ((x), current_x))
     #logging.debug("Mapping Y: %d -> %d" % ((z), current_y))
 
+    #numpy arrays: first row and then column!
     heatmap_array[current_z][current_x] += 1
   return heatmap_array
+
 
 def main(csv_file):
   img = imread("data/terminal_mapview.png")
@@ -109,12 +110,13 @@ def main(csv_file):
   #np.set_printoptions(precision=1, suppress=True, linewidth=200)
 
   ##Show Heatmap
-  plt.figure(frameon=False, figsize=(10,8))
+  plt.figure(frameon=False, figsize=(15,12))
 
   heatmap_scale = 6.2
   offset_x = -22
   offset_y = 110
 
+  #determine offset according to the first and min/max coordinates
   min_x = min([element[1] for element in coordinates])
   first_x = coordinates[0][1]
   min_y = min([element[3] for element in coordinates])
@@ -133,7 +135,6 @@ def main(csv_file):
   imshow(heatmap_array, alpha=1, extent=(delta_x, delta_x + heatmap_size_x, delta_y, delta_y + heatmap_size_y))
   plt.imshow(img, zorder=-1, extent=(0, image_width_resized, image_height_resized, 0))
 
-  #plt.savefig('heatmap.png')
   plt.show()
 
 if __name__ == "__main__":
