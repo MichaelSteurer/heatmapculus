@@ -26,6 +26,8 @@ import logging
 log_format = '%(asctime)s %(levelname)s %(message)s'
 
 
+# Test comment
+
 logging.basicConfig(format=log_format,
                     level=logging.DEBUG, stream=sys.stdout)
 
