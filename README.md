@@ -1,6 +1,6 @@
 heatmapculus
 ============
 
-Heatmaps for Traces collected by an Oculus Rift
+Heatmaps from user traces
 
 Simple Python script to visualise tracking data.
